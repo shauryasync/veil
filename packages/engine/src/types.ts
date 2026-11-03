@@ -10,3 +10,9 @@ export interface Detector {
   name: string;
   detect(text: string): Detection[];
 }
+
+export type RedactResult = {
+  redactedText: string;
+  detections: Detection[];
+  mapping: Record<string, string>;
+};

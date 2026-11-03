@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { emailDetector } from "../src/detectors/email";
+import { emailDetector } from "../src/detectors/email.js";
 
 describe("emailDetector", () => {
   it("detects standard valid emails with accurate field values", () => {
