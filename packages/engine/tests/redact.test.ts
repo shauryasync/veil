@@ -1,6 +1,7 @@
 import { redact } from "../src/redact.js";
 import { it, describe, expect } from "vitest";
 import { emailDetector } from "../src/detectors/email.js";
+import { SessionMapping } from "../src/mapping.js";
 describe("Redact_Test", () => {
   it("keeps text unchanged when no detection happens", () => {
     const text = "Nothing sensitive here.";
@@ -26,5 +27,17 @@ describe("Redact_Test", () => {
     for (const detection of result.detections) {
       expect(text.slice(detection.start, detection.end)).toBe(detection.value);
     }
+  });
+
+  it("reuses placeholders across calls when given the same session mapping", () => {
+    const sessionMapping = new SessionMapping();
+    const first = redact("Contact alex@gmail.com", [emailDetector], sessionMapping);
+    const second = redact("Email alex@gmail.com again", [emailDetector], sessionMapping);
+
+    expect(first.redactedText).toBe("Contact [[VEIL:EMAIL_1]]");
+    expect(second.redactedText).toBe("Email [[VEIL:EMAIL_1]] again");
+    expect(second.mapping).toEqual({
+      "[[VEIL:EMAIL_1]]": "alex@gmail.com",
+    });
   });
 });
