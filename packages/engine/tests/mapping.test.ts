@@ -5,8 +5,8 @@ describe("SessionMapping", () => {
   it("reuses a placeholder when the same value is seen again", () => {
     const mapping = new SessionMapping();
 
-    const first = mapping.getOrWritePlaceholder("alex@example.com", "EMAIL");
-    const second = mapping.getOrWritePlaceholder("alex@example.com", "EMAIL");
+    const first = mapping.getOrCreatePlaceholder("alex@example.com", "EMAIL");
+    const second = mapping.getOrCreatePlaceholder("alex@example.com", "EMAIL");
 
     expect(first).toBe("[[VEIL:EMAIL_1]]");
     expect(second).toBe(first);
@@ -18,8 +18,8 @@ describe("SessionMapping", () => {
   it("assigns different placeholders to different values of the same type", () => {
     const mapping = new SessionMapping();
 
-    const first = mapping.getOrWritePlaceholder("alex@example.com", "EMAIL");
-    const second = mapping.getOrWritePlaceholder("sam@example.com", "EMAIL");
+    const first = mapping.getOrCreatePlaceholder("alex@example.com", "EMAIL");
+    const second = mapping.getOrCreatePlaceholder("sam@example.com", "EMAIL");
 
     expect(first).toBe("[[VEIL:EMAIL_1]]");
     expect(second).toBe("[[VEIL:EMAIL_2]]");
@@ -28,8 +28,8 @@ describe("SessionMapping", () => {
   it("normalizes the type before assigning counters so email variants share one sequence", () => {
     const mapping = new SessionMapping();
 
-    const first = mapping.getOrWritePlaceholder("alex@example.com", "email");
-    const second = mapping.getOrWritePlaceholder("sam@example.com", "EMAIL");
+    const first = mapping.getOrCreatePlaceholder("alex@example.com", "email");
+    const second = mapping.getOrCreatePlaceholder("sam@example.com", "EMAIL");
 
     expect(first).toBe("[[VEIL:EMAIL_1]]");
     expect(second).toBe("[[VEIL:EMAIL_2]]");

@@ -12,21 +12,19 @@ export function redact(
     detections.push(...detector.detect(text));
   }
 
-  for (const detection of detections) {
-    sessionMapping.getOrWritePlaceholder(detection.value, detection.type);
-  }
-
-  //sort descending to prevent index drift
-  const sortedDetections = [...detections].sort((a, b) => b.start - a.start);
+  const replacements = detections
+    .map((detection) => ({
+      detection,
+      placeholder: sessionMapping.getOrCreatePlaceholder(
+        detection.value,
+        detection.type,
+      ),
+    }))
+    .sort((a, b) => b.detection.start - a.detection.start);
 
   //backward string replacement
   let redactedText = text;
-  for (const detection of sortedDetections) {
-    const placeholder = sessionMapping.getPlaceholder(detection.value);
-    if (placeholder === undefined) {
-      throw new Error("Missing placeholder for detected value");
-    }
-
+  for (const { detection, placeholder } of replacements) {
     redactedText =
       redactedText.slice(0, detection.start) +
       placeholder +

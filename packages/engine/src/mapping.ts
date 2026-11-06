@@ -3,7 +3,7 @@ export class SessionMapping {
   private valueToPlaceholder = new Map<string, string>();
   private placeholderToValue = new Map<string, string>();
 
-  getOrWritePlaceholder(value: string, type: string): string {
+  getOrCreatePlaceholder(value: string, type: string): string {
     const existingPlaceholder = this.valueToPlaceholder.get(value);
     if (existingPlaceholder !== undefined) {
       return existingPlaceholder;
