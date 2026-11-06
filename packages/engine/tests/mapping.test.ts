@@ -24,4 +24,18 @@ describe("SessionMapping", () => {
     expect(first).toBe("[[VEIL:EMAIL_1]]");
     expect(second).toBe("[[VEIL:EMAIL_2]]");
   });
+
+  it("normalizes the type before assigning counters so email variants share one sequence", () => {
+    const mapping = new SessionMapping();
+
+    const first = mapping.getOrWritePlaceholder("alex@example.com", "email");
+    const second = mapping.getOrWritePlaceholder("sam@example.com", "EMAIL");
+
+    expect(first).toBe("[[VEIL:EMAIL_1]]");
+    expect(second).toBe("[[VEIL:EMAIL_2]]");
+    expect(mapping.getMapping()).toEqual({
+      "[[VEIL:EMAIL_1]]": "alex@example.com",
+      "[[VEIL:EMAIL_2]]": "sam@example.com",
+    });
+  });
 });

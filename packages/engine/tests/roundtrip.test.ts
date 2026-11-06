@@ -21,4 +21,19 @@ describe("Engine Round-Trip Tests", () => {
     const redacted = "Contact [[VEIL:EMAIL_1]]";
     expect(restore(redacted, mapping)).toBe("Contact user$&name@domain.com");
   });
+
+  it("restores multi-word placeholder types like API_KEY", () => {
+    const mapping = { "[[VEIL:API_KEY_1]]": "sk_live_abc123" };
+    const redacted = "Authorization: Bearer [[VEIL:API_KEY_1]]";
+    expect(restore(redacted, mapping)).toBe(
+      "Authorization: Bearer sk_live_abc123",
+    );
+  });
+
+  it("preserves an existing literal placeholder while redacting a real email", () => {
+    const input = "Literal [[VEIL:EMAIL_1]] plus real user@example.com";
+    const result = redact(input, [emailDetector]);
+
+    expect(restore(result.redactedText, result.mapping)).toBe(input);
+  });
 });

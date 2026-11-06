@@ -2,6 +2,8 @@ import { redact } from "../src/redact.js";
 import { it, describe, expect } from "vitest";
 import { emailDetector } from "../src/detectors/email.js";
 import { SessionMapping } from "../src/mapping.js";
+import type { Detector } from "../src/types.js";
+
 describe("Redact_Test", () => {
   it("keeps text unchanged when no detection happens", () => {
     const text = "Nothing sensitive here.";
@@ -38,6 +40,43 @@ describe("Redact_Test", () => {
     expect(second.redactedText).toBe("Email [[VEIL:EMAIL_1]] again");
     expect(second.mapping).toEqual({
       "[[VEIL:EMAIL_1]]": "alex@gmail.com",
+    });
+  });
+
+  it("resolves overlapping detections by keeping the longest span", () => {
+    const text = "call alice@example.com now";
+    const detectors: Detector[] = [
+      {
+        name: "outer",
+        detect: () => [
+          {
+            type: "EMAIL",
+            start: 5,
+            end: 23,
+            value: "alice@example.com",
+            confidence: 1,
+          },
+        ],
+      },
+      {
+        name: "inner",
+        detect: () => [
+          {
+            type: "EMAIL",
+            start: 11,
+            end: 18,
+            value: "example",
+            confidence: 0.9,
+          },
+        ],
+      },
+    ];
+
+    const result = redact(text, detectors);
+
+    expect(result.redactedText).toBe("call [[VEIL:EMAIL_1]] now");
+    expect(result.mapping).toEqual({
+      "[[VEIL:EMAIL_1]]": "alice@example.com",
     });
   });
 });
