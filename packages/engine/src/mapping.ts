@@ -9,10 +9,11 @@ export class SessionMapping {
       return existingPlaceholder;
     }
 
-    const currentCount = (this.typeCounters.get(type) ?? 0) + 1;
-    this.typeCounters.set(type, currentCount);
+    const normalizedType = type.toUpperCase();
+    const currentCount = (this.typeCounters.get(normalizedType) ?? 0) + 1;
+    this.typeCounters.set(normalizedType, currentCount);
 
-    const placeholder = `[[VEIL:${type.toUpperCase()}_${currentCount}]]`;
+    const placeholder = `[[VEIL:${normalizedType}_${currentCount}]]`;
 
     this.valueToPlaceholder.set(value, placeholder);
     this.placeholderToValue.set(placeholder, value);

@@ -23,8 +23,9 @@ describe("Engine Round-Trip Tests", () => {
   });
 
   it("restores multi-word placeholder types like API_KEY", () => {
-    const mapping = { "[[VEIL:API_KEY_1]]": "sk_live_abc123" };
-    const redacted = "Authorization: Bearer [[VEIL:API_KEY_1]]";
+    const placeholder = "[[VEIL:API_KEY_1]]";
+    const mapping = { [placeholder]: "sk_live_abc123" };
+    const redacted = `Authorization: Bearer ${placeholder}`;
     expect(restore(redacted, mapping)).toBe(
       "Authorization: Bearer sk_live_abc123",
     );
