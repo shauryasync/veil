@@ -25,16 +25,19 @@ describe("SessionMapping", () => {
     expect(second).toBe("[[VEIL:EMAIL_2]]");
   });
 
-  it("normalizes the type before assigning counters so email variants share one sequence", () => {
+  it("keeps counters independent for different types", () => {
     const mapping = new SessionMapping();
 
-    const first = mapping.getOrCreatePlaceholder("alex@example.com", "email");
-    const second = mapping.getOrCreatePlaceholder("sam@example.com", "EMAIL");
+    const firstEmail = mapping.getOrCreatePlaceholder("alex@example.com", "EMAIL");
+    const phone = mapping.getOrCreatePlaceholder("+1-555-0100", "PHONE_NUMBER");
+    const secondEmail = mapping.getOrCreatePlaceholder("sam@example.com", "EMAIL");
 
-    expect(first).toBe("[[VEIL:EMAIL_1]]");
-    expect(second).toBe("[[VEIL:EMAIL_2]]");
+    expect(firstEmail).toBe("[[VEIL:EMAIL_1]]");
+    expect(phone).toBe("[[VEIL:PHONE_NUMBER_1]]");
+    expect(secondEmail).toBe("[[VEIL:EMAIL_2]]");
     expect(mapping.getMapping()).toEqual({
       "[[VEIL:EMAIL_1]]": "alex@example.com",
+      "[[VEIL:PHONE_NUMBER_1]]": "+1-555-0100",
       "[[VEIL:EMAIL_2]]": "sam@example.com",
     });
   });

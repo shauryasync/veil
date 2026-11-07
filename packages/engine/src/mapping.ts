@@ -1,9 +1,10 @@
+import type { DetectionType } from "./types.js";
 export class SessionMapping {
   private typeCounters = new Map<string, number>();
   private valueToPlaceholder = new Map<string, string>();
   private placeholderToValue = new Map<string, string>();
 
-  getOrCreatePlaceholder(value: string, type: string): string {
+  getOrCreatePlaceholder(value: string, type: DetectionType): string {
     const existingPlaceholder = this.valueToPlaceholder.get(value);
     if (existingPlaceholder !== undefined) {
       return existingPlaceholder;

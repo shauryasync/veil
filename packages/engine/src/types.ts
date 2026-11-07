@@ -1,5 +1,19 @@
+export type DetectionType =
+  | "EMAIL"
+  | "PHONE_NUMBER"
+  | "PAN"
+  | "AADHAAR"
+  | "API_KEY"
+  | "JWT"
+  | "AWS_ACCESS_KEY"
+  | "PRIVATE_KEY"
+  | "HIGH_ENTROPY_TOKEN"
+  | "CONNECTION_STRING"
+  | "ENV_VAR"
+  | "LITERAL";
+
 export type Detection = {
-  type: string;
+  type: DetectionType;
   start: number;
   end: number;
   value: string;
