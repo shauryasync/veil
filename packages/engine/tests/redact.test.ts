@@ -52,7 +52,7 @@ describe("Redact_Test", () => {
           {
             type: "EMAIL",
             start: 5,
-            end: 23,
+            end: 22,
             value: "alice@example.com",
             confidence: 1,
           },
@@ -77,6 +77,116 @@ describe("Redact_Test", () => {
     expect(result.redactedText).toBe("call [[VEIL:EMAIL_1]] now");
     expect(result.mapping).toEqual({
       "[[VEIL:EMAIL_1]]": "alice@example.com",
+    });
+  });
+
+  it("uses the earlier start when overlapping detections have equal lengths", () => {
+    const detectors: Detector[] = [
+      {
+        name: "earlier",
+        detect: () => [
+          {
+            type: "EMAIL",
+            start: 1,
+            end: 5,
+            value: "bcde",
+            confidence: 1,
+          },
+        ],
+      },
+      {
+        name: "later",
+        detect: () => [
+          {
+            type: "API_KEY",
+            start: 3,
+            end: 7,
+            value: "defg",
+            confidence: 1,
+          },
+        ],
+      },
+    ];
+
+    const result = redact("abcdefg", detectors);
+
+    expect(result.redactedText).toBe("a[[VEIL:EMAIL_1]]fg");
+    expect(result.detections).toHaveLength(1);
+    expect(result.mapping).toEqual({ "[[VEIL:EMAIL_1]]": "bcde" });
+  });
+
+  it("uses detector order when overlapping detections have the same span", () => {
+    const detectors: Detector[] = [
+      {
+        name: "first",
+        detect: () => [
+          {
+            type: "API_KEY",
+            start: 1,
+            end: 4,
+            value: "bcd",
+            confidence: 1,
+          },
+        ],
+      },
+      {
+        name: "second",
+        detect: () => [
+          {
+            type: "EMAIL",
+            start: 1,
+            end: 4,
+            value: "bcd",
+            confidence: 1,
+          },
+        ],
+      },
+    ];
+
+    const result = redact("abcde", detectors);
+
+    expect(result.redactedText).toBe("a[[VEIL:API_KEY_1]]e");
+    expect(result.detections).toHaveLength(1);
+    expect(result.mapping).toEqual({ "[[VEIL:API_KEY_1]]": "bcd" });
+  });
+
+  it("keeps adjacent detections because they do not overlap", () => {
+    const detectors: Detector[] = [
+      {
+        name: "left",
+        detect: () => [
+          {
+            type: "EMAIL",
+            start: 0,
+            end: 2,
+            value: "ab",
+            confidence: 1,
+          },
+        ],
+      },
+      {
+        name: "right",
+        detect: () => [
+          {
+            type: "API_KEY",
+            start: 2,
+            end: 4,
+            value: "cd",
+            confidence: 1,
+          },
+        ],
+      },
+    ];
+
+    const result = redact("abcdef", detectors);
+
+    expect(result.redactedText).toBe(
+      "[[VEIL:EMAIL_1]][[VEIL:API_KEY_1]]ef",
+    );
+    expect(result.detections).toHaveLength(2);
+    expect(result.mapping).toEqual({
+      "[[VEIL:EMAIL_1]]": "ab",
+      "[[VEIL:API_KEY_1]]": "cd",
     });
   });
 });
