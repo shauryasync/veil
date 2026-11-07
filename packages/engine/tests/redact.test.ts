@@ -43,6 +43,25 @@ describe("Redact_Test", () => {
     });
   });
 
+  it("does not include the original sensitive value in redacted text", () => {
+    const sensitiveValue = "private.person@example.com";
+    const result = redact(`Contact ${sensitiveValue}`, [emailDetector]);
+
+    expect(result.redactedText).not.toContain(sensitiveValue);
+  });
+
+  it("redacts an email address found inside a URL path", () => {
+    const text = "Visit https://api.site.com/v1/user@domain.com/profile";
+    const result = redact(text, [emailDetector]);
+
+    expect(result.redactedText).toBe(
+      "Visit https://api.site.com/v1/[[VEIL:EMAIL_1]]/profile",
+    );
+    expect(result.mapping).toEqual({
+      "[[VEIL:EMAIL_1]]": "user@domain.com",
+    });
+  });
+
   it("resolves overlapping detections by keeping the longest span", () => {
     const text = "call alice@example.com now";
     const detectors: Detector[] = [

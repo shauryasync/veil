@@ -41,4 +41,18 @@ describe("SessionMapping", () => {
       "[[VEIL:EMAIL_2]]": "sam@example.com",
     });
   });
+
+  it("treats values with different casing as distinct", () => {
+    const mapping = new SessionMapping();
+
+    const first = mapping.getOrCreatePlaceholder("Foo@x.com", "EMAIL");
+    const second = mapping.getOrCreatePlaceholder("foo@x.com", "EMAIL");
+
+    expect(first).toBe("[[VEIL:EMAIL_1]]");
+    expect(second).toBe("[[VEIL:EMAIL_2]]");
+    expect(mapping.getMapping()).toEqual({
+      "[[VEIL:EMAIL_1]]": "Foo@x.com",
+      "[[VEIL:EMAIL_2]]": "foo@x.com",
+    });
+  });
 });

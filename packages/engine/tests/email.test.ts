@@ -41,4 +41,29 @@ describe("emailDetector", () => {
     expect(result).toHaveLength(1);
     expect(result[0].value).toBe("user@domain.com");
   });
+
+  it("documents the known false positive logo@2x.png", () => {
+    const result = emailDetector.detect("Image file: logo@2x.png");
+
+    expect(result.map(({ value }) => value)).toEqual(["logo@2x.png"]);
+  });
+
+  it("excludes trailing punctuation from detected email values", () => {
+    const result = emailDetector.detect("Contact a@b.com. Or a@b.com,");
+
+    expect(result.map(({ value }) => value)).toEqual([
+      "a@b.com",
+      "a@b.com",
+    ]);
+  });
+
+  it("supports case, plus-addressing, subdomains, and empty input", () => {
+    expect(
+      emailDetector.detect("USER@Example.COM").map(({ value }) => value),
+    ).toEqual(["USER@Example.COM"]);
+    expect(
+      emailDetector.detect("a+tag@b.co.uk").map(({ value }) => value),
+    ).toEqual(["a+tag@b.co.uk"]);
+    expect(emailDetector.detect("")).toEqual([]);
+  });
 });
