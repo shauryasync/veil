@@ -8,6 +8,32 @@ export function redact(
 ): RedactResult {
   // 1. Gather all raw detections
   const detections: Detection[] = [];
+
+  // TODO: Before regular detectors run, find placeholder-shaped text in the
+  // original input and add one Detection per match with type "LITERAL".
+  // Each detection's start/end/value must describe the exact matched text;
+  // allow underscores in TYPE, as in [[VEIL:API_KEY_1]].
+  function findLiteralPlaceholders(text: string): Detection[] {
+    const detections: Detection[] = [];
+    const placeholderPattern =
+      /\[\[VEIL:[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*_\d+\]\]/g;
+
+    for (const match of text.matchAll(placeholderPattern)) {
+      const value = match[0];
+
+      detections.push({
+        type: "LITERAL",
+        start: match.index,
+        end: match.index + value.length,
+        value: value,
+        confidence: 1.0,
+      });
+    }
+
+    return detections;
+  }
+  detections.push(...findLiteralPlaceholders(text));
+
   for (const detector of detectors) {
     detections.push(...detector.detect(text));
   }
@@ -26,6 +52,12 @@ export function redact(
 
   // 2. Sort by Priority Rules (Length desc -> Start asc -> Order asc)
   candidates.sort((a, b) => {
+    // TODO: Make LITERAL detections win over any overlapping non-LITERAL
+    // detection. Then apply the existing length, start, and original-order
+    // tie-breakers. Keep the priority explicit and deterministic.
+    const isLiteralA = a.detection.type === "LITERAL" ? 1 : 0;
+    const isLiteralB = b.detection.type === "LITERAL" ? 1 : 0;
+    if (isLiteralA !== isLiteralB) return isLiteralB - isLiteralA;
     const lenA = a.detection.end - a.detection.start;
     const lenB = b.detection.end - b.detection.start;
 

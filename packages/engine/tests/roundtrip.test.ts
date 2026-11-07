@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { emailDetector } from "../src/detectors/email.js";
 import { redact } from "../src/redact.js";
 import { restore } from "../src/restore.js";
-
+import { SessionMapping } from "../src/mapping.js";
 describe("Engine Round-Trip Tests", () => {
   it("restores exact original string", () => {
     const input = "Send log to user@domain.com and ops@domain.com";
@@ -35,6 +35,35 @@ describe("Engine Round-Trip Tests", () => {
     const input = "Literal [[VEIL:EMAIL_1]] plus real user@example.com";
     const result = redact(input, [emailDetector]);
 
+    expect(result.redactedText).toBe(
+      "Literal [[VEIL:LITERAL_1]] plus real [[VEIL:EMAIL_1]]",
+    );
+
+    expect(result.mapping).toEqual({
+      "[[VEIL:LITERAL_1]]": "[[VEIL:EMAIL_1]]",
+      "[[VEIL:EMAIL_1]]": "user@example.com",
+    });
+
     expect(restore(result.redactedText, result.mapping)).toBe(input);
+  });
+
+  it("round-trip redaction with literal placeholders", () => {
+    const mapping = new SessionMapping();
+    const input =
+      "User key is [[VEIL:API_KEY_1]] and email is test@example.com";
+
+    const result = redact(input, [emailDetector], mapping);
+
+    expect(result.redactedText).toBe(
+      "User key is [[VEIL:LITERAL_1]] and email is [[VEIL:EMAIL_1]]",
+    );
+
+    expect(result.mapping).toEqual({
+      "[[VEIL:LITERAL_1]]": "[[VEIL:API_KEY_1]]",
+      "[[VEIL:EMAIL_1]]": "test@example.com",
+    });
+
+    const restored = restore(result.redactedText, result.mapping);
+    expect(restored).toBe(input);
   });
 });
