@@ -14,6 +14,7 @@ describe("default detectors", () => {
       "aws-access-key",
       "private-key",
       "connection-string",
+      "env-var",
     ]);
   });
 
@@ -23,6 +24,13 @@ describe("default detectors", () => {
 
     expect(result.redactedText).toBe("Contact [[VEIL:EMAIL_1]]");
     expect(result.detections.map(({ type }) => type)).toEqual(["EMAIL"]);
+  });
+
+  it("uses the environment-variable detector by default", () => {
+    const result = redact("API_TOKEN=synthetic-token");
+
+    expect(result.redactedText).toBe("API_TOKEN=[[VEIL:ENV_VAR_1]]");
+    expect(result.detections.map(({ type }) => type)).toEqual(["ENV_VAR"]);
   });
 
   it("allows callers to keep passing a custom detector list", () => {
