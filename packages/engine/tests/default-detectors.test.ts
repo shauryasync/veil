@@ -15,6 +15,7 @@ describe("default detectors", () => {
       "private-key",
       "connection-string",
       "env-var",
+      "high-entropy-token",
     ]);
   });
 
