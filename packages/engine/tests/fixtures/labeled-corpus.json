@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "contact-details",
+      "description": "Email and phone number in ordinary support text",
+      "text": "Please contact samira.iyer@example.test or call +91 9044432123.",
+      "expected": [
+        {
+          "type": "EMAIL",
+          "value": "samira.iyer@example.test"
+        },
+        {
+          "type": "PHONE_NUMBER",
+          "value": "+91 9044432123"
+        }
+      ]
+    },
+    {
+      "id": "identity-fields",
+      "description": "Synthetic PAN and checksum-valid Aadhaar in a profile",
+      "text": "Profile fields: PAN ABCPE1234F; Aadhaar 584920176341.",
+      "expected": [
+        {
+          "type": "PAN",
+          "value": "ABCPE1234F"
+        },
+        {
+          "type": "AADHAAR",
+          "value": "584920176341"
+        }
+      ]
+    },
+    {
+      "id": "authorization-values",
+      "description": "Synthetic JWT-shaped token and AWS access-key ID",
+      "text": "Authorization: eyJhbGci.eyJzdWIi.c2lnbmF0dXJl; AWS ID: AKIAFAKEFAKEFAKEFAKE",
+      "expected": [
+        {
+          "type": "JWT",
+          "value": "eyJhbGci.eyJzdWIi.c2lnbmF0dXJl"
+        },
+        {
+          "type": "AWS_ACCESS_KEY",
+          "value": "AKIAFAKEFAKEFAKEFAKE"
+        }
+      ]
+    },
+    {
+      "id": "private-key-block",
+      "description": "Synthetic PEM private-key block in a configuration note",
+      "text": "Signing key:\n-----BEGIN PRIVATE KEY-----\nQUJDREVGR0g=\n-----END PRIVATE KEY-----",
+      "expected": [
+        {
+          "type": "PRIVATE_KEY",
+          "value": "-----BEGIN PRIVATE KEY-----\nQUJDREVGR0g=\n-----END PRIVATE KEY-----"
+        }
+      ]
+    },
+    {
+      "id": "database-configuration",
+      "description": "PostgreSQL URI in a config assignment; userinfo@host challenges email matching",
+      "text": "DATABASE_URL=postgres://demo_user:fakepass@db.example.test:5432/sample",
+      "expected": [
+        {
+          "type": "CONNECTION_STRING",
+          "value": "postgres://demo_user:fakepass@db.example.test:5432/sample"
+        },
+        {
+          "type": "ENV_VAR",
+          "value": "postgres://demo_user:fakepass@db.example.test:5432/sample"
+        }
+      ]
+    },
+    {
+      "id": "env-configuration",
+      "description": "Export syntax, quoted value, inline comment, and a non-secret setting",
+      "text": "export API_TOKEN=calm-blue-planet\nDATABASE_PASSWORD=\"sample password\" # local-only\nPORT=3000",
+      "expected": [
+        {
+          "type": "ENV_VAR",
+          "value": "calm-blue-planet"
+        },
+        {
+          "type": "ENV_VAR",
+          "value": "sample password"
+        },
+        {
+          "type": "ENV_VAR",
+          "value": "3000"
+        }
+      ]
+    },
+    {
+      "id": "unstructured-token",
+      "description": "Synthetic random-looking token in a source-code snippet",
+      "text": "const apiToken = 'A7fK2mQ9xP4vB8nR6zW3';",
+      "expected": [
+        {
+          "type": "HIGH_ENTROPY_TOKEN",
+          "value": "A7fK2mQ9xP4vB8nR6zW3"
+        }
+      ]
+    },
+    {
+      "id": "ordinary-code-and-identifiers",
+      "description": "Version, port, UUID, hexadecimal hash, and public key are not in-scope secrets",
+      "text": "const version = '2.4.1'; const port = 3000; id=550e8400-e29b-41d4-a716-446655440000; sha=0123456789abcdef0123456789abcdef; -----BEGIN PUBLIC KEY-----",
+      "expected": []
+    },
+    {
+      "id": "non-credential-urls-and-comments",
+      "description": "Ordinary web URL, credential-free database URL, and commented-out assignment",
+      "text": "Docs: https://example.test/guide; DB: postgres://db.example.test/sample; # API_TOKEN=not-a-value",
+      "expected": []
+    },
+    {
+      "id": "malformed-identifiers",
+      "description": "Malformed PAN, invalid-checksum Aadhaar, and unsupported AWS-like prefix",
+      "text": "PAN ABCDE1234F; Aadhaar 584920176340; key FAKEFAKEFAKEFAKEFAKE",
+      "expected": []
+    }
+  ]
+}
