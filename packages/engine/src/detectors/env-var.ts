@@ -1,7 +1,9 @@
 import type { Detection, Detector } from "../types.js";
+import { isHighEntropyToken } from "./high-entropy-token.js";
 
 const ENV_ASSIGNMENT_REGEX =
-  /^[ \t]*(?:export[ \t]+)?[A-Za-z_][A-Za-z0-9_]*[ \t]*=[ \t]*(.*)$/gm;
+  /^[ \t]*(?:export[ \t]+)?([A-Za-z_][A-Za-z0-9_]*)[ \t]*=[ \t]*(.*)$/gm;
+const SENSITIVE_ENV_KEY_REGEX = /(?:KEY|SECRET|TOKEN|PASSWORD|URL)/i;
 
 export const envVarDetector: Detector = {
   name: "env-var",
@@ -9,8 +11,9 @@ export const envVarDetector: Detector = {
     const detections: Detection[] = [];
 
     for (const match of text.matchAll(ENV_ASSIGNMENT_REGEX)) {
-      const rawValue = match[1];
-      if (rawValue === undefined || rawValue.length === 0) {
+      const key = match[1];
+      const rawValue = match[2];
+      if (key === undefined || rawValue === undefined || rawValue.length === 0) {
         continue;
       }
 
@@ -76,9 +79,17 @@ export const envVarDetector: Detector = {
         continue;
       }
 
+      const value = text.slice(start, end);
+      if (
+        !SENSITIVE_ENV_KEY_REGEX.test(key) &&
+        !isHighEntropyToken(value)
+      ) {
+        continue;
+      }
+
       detections.push({
         type: "ENV_VAR",
-        value: text.slice(start, end),
+        value,
         start,
         end,
         confidence: 1.0,

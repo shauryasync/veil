@@ -62,6 +62,33 @@ describe(".env value detector", () => {
     ]);
   });
 
+  it("ignores ordinary Python assignments instead of treating them as env vars", () => {
+    const text = [
+      "total = 1 + 2",
+      'name = "Ada"',
+      "is_ready = True",
+      "items = [1, 2, 3]",
+      'message = "hello"',
+    ].join("\n");
+
+    expect(envVarDetector.detect(text)).toEqual([]);
+  });
+
+  it("ignores ordinary configuration values such as PORT and APP_MODE", () => {
+    const text = "PORT=3000\nAPP_MODE=production";
+
+    expect(envVarDetector.detect(text)).toEqual([]);
+  });
+
+  it("detects a high-entropy value even when its key is not sensitive-looking", () => {
+    const token = "A7fK2mQ9xP4vB8nR6zW3";
+    const text = `BUILD_LABEL=${token}`;
+    const result = envVarDetector.detect(text)[0];
+
+    expect(result?.value).toBe(token);
+    expect(text.slice(result?.start, result?.end)).toBe(token);
+  });
+
   describe("false positives", () => {
     it("ignores comments and lines without an assignment", () => {
       const text = [

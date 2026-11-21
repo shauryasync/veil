@@ -74,7 +74,7 @@
     },
     {
       "id": "env-configuration",
-      "description": "Export syntax, quoted value, inline comment, and a non-secret setting",
+      "description": "Export syntax and quoted value; PORT is an ordinary non-sensitive setting",
       "text": "export API_TOKEN=calm-blue-planet\nDATABASE_PASSWORD=\"sample password\" # local-only\nPORT=3000",
       "expected": [
         {
@@ -84,10 +84,6 @@
         {
           "type": "ENV_VAR",
           "value": "sample password"
-        },
-        {
-          "type": "ENV_VAR",
-          "value": "3000"
         }
       ]
     },
