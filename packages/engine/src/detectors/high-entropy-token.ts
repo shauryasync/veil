@@ -30,6 +30,14 @@ function isUuidOrHash(value: string): boolean {
   return HASH_LENGTHS.has(value.length) && /^[0-9a-f]+$/i.test(value);
 }
 
+export function isHighEntropyToken(value: string): boolean {
+  return (
+    value.length >= MIN_TOKEN_LENGTH &&
+    !isUuidOrHash(value) &&
+    calculateEntropy(value) >= MIN_ENTROPY_BITS_PER_CHARACTER
+  );
+}
+
 export const highEntropyTokenDetector: Detector = {
   name: "high-entropy-token",
   detect(text: string): Detection[] {
@@ -41,11 +49,7 @@ export const highEntropyTokenDetector: Detector = {
         continue;
       }
 
-      if (
-        value.length < MIN_TOKEN_LENGTH ||
-        isUuidOrHash(value) ||
-        calculateEntropy(value) < MIN_ENTROPY_BITS_PER_CHARACTER
-      ) {
+      if (!isHighEntropyToken(value)) {
         continue;
       }
 
